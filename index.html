@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title></title>
+  <link rel='stylesheet' href='style.css' type='text/css' />
+</head>
+<body>
+  <input id='new-clothing' placeholder='Add clothes' autofocus>
+  <ul id='clothes'></ul>
+  <input id='new-outfit' placeholder='Make an outfit'>
+  <ul id='outfits'></ul>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.22.2/moment.js"></script>
+  <script> moment.fn.toJSON = function() { return this.format() } </script>
+  <script src='app.js'></script>
+</body>
+</html>
