@@ -1,4 +1,4 @@
-var util = {
+let util = {
   uuid: function() {
     //replace with actual uuid4 implementation
     let random = '' + Math.random()
@@ -15,8 +15,9 @@ var util = {
   }
 }
 
-var App = {
+let App = {
   init: function() {
+    moment.fn.toJSON = function() { return this.format() } 
     this.clothes = util.retrieve('clothes')
     this.outfits = util.retrieve('outfits')
     this.bindEvents()
@@ -24,17 +25,17 @@ var App = {
   },
 
   createClothing: function (e) {
-    var input = e.target
-    var value = input.value.trim()
-    var key = e.key
-
-    if ( key !== 'Enter' || !value ) {
-      return
-    }
+    let input = e.target
+    let value = input.value.trim()
+    let key = e.key
 
     if ( key === 'Enter' ) {
       input.value = ''
     } 
+
+    if ( key !== 'Enter' || !value ) {
+      return
+    }
 
     this.clothes.push({
       id: util.uuid(),
@@ -43,8 +44,6 @@ var App = {
     })
 
     this.render()
-
-
   },
 
   selectedClothes: function() {
@@ -53,17 +52,17 @@ var App = {
   },
 
   createOutfit: function (e) {
-    var input = e.target
-    var outfitName = input.value.trim()
-    var selectedClothes = this.selectedClothes()
-    var key = e.key
-
-    if ( !outfitName || selectedClothes.length===0 || key !== 'Enter') {
-      return
-    }
+    let input = e.target
+    let outfitName = input.value.trim()
+    let selectedClothes = this.selectedClothes()
+    let key = e.key
 
     if ( key ==='Enter' ){
       input.value = ''
+    }
+
+    if ( !outfitName || selectedClothes.length===0 || key !== 'Enter') {
+      return
     }
 
     selectedClothes = this.selectedClothes().map( (selected) => {   
@@ -73,30 +72,40 @@ var App = {
       }
     }) 
 
-    var newOutfit = {
+    let newOutfit = {
       id: util.uuid(),
       name: outfitName,
       clothes: selectedClothes,
       isContentVisible: false,
+      datesWorn: [],
+    }
+    this.outfits.push(newOutfit)
+    this.render()
+  },
+
+  wearOutfit: function(e) {
+    if (!e.target.matches('.wear-outfit')) {
+      return
     }
 
-    this.outfits.push(newOutfit)
+    let i = this.getIndexFromEl(e.target, this.outfits)
+    this.outfits[i].datesWorn.push(moment())
 
     this.render()
-
   },
 
   bindEvents: function() {
-    var newClothing = document.getElementById('new-clothing')
-    var newOutfit = document.getElementById('new-outfit')
-    var clothingList = document.getElementById('clothes')
-    var outfitList = document.getElementById('outfits')
+    let newClothing = document.getElementById('new-clothing')
+    let newOutfit = document.getElementById('new-outfit')
+    let clothingList = document.getElementById('clothes')
+    let outfitList = document.getElementById('outfits')
     newClothing.addEventListener('keyup', this.createClothing.bind(this))
     newOutfit.addEventListener('keyup', this.createOutfit.bind(this))
     clothingList.addEventListener('click', this.toggle.bind(this))
     clothingList.addEventListener('click', this.delete.bind(this))
     outfitList.addEventListener('click', this.toggleOutfitContent.bind(this))
     outfitList.addEventListener('click', this.delete.bind(this))
+    outfitList.addEventListener('click', this.wearOutfit.bind(this))
   },
 
   render: function(){
@@ -108,8 +117,8 @@ var App = {
   },
 
   getIndexFromEl: function(el, array) {
-    var id = el.closest('li').dataset.id
-    var i = array.length
+    let id = el.closest('li').dataset.id
+    let i = array.length
 
     while (i--) {
       if (array[i].id === id) {
@@ -122,7 +131,7 @@ var App = {
     if (!e.target.matches('.toggle')){ 
       return
     }
-    var i = this.getIndexFromEl(e.target, this.clothes)
+    let i = this.getIndexFromEl(e.target, this.clothes)
     this.clothes[i].isSelected = !this.clothes[i].isSelected
     this.render()
   },
@@ -131,9 +140,9 @@ var App = {
     if (!e.target.matches('.delete')){ 
       return
     }
-    var closestListID = e.target.closest('ul').id
-    var i = this.getIndexFromEl(e.target, closestListID)
-    this[closestListID].splice(i, 1)
+    let closestList = this[e.target.closest('ul').id]
+    let i = this.getIndexFromEl(e.target, closestList)
+    closestList.splice(i, 1)
 
     this.render()
   },
@@ -159,30 +168,41 @@ var App = {
     
 
     let clothingLi = document.createElement('li')
+    clothingLi.dataset.id = clothing.id
+
     let clothingIsSelected = clothing.isSelected
     if ( clothingIsSelected ) {
       clothingLi.classList.add('selected')
     }
-    clothingLi.dataset.id = clothing.id
 
     let clothingName = document.createElement('label')
     clothingName.textContent = clothing.name
 
-    let toggleInput = document.createElement('input')
+    let toggleInput = this.checkboxInput(clothingIsSelected)
     toggleInput.classList.add('toggle')
-    toggleInput.type = 'checkbox'
-    toggleInput.checked = clothingIsSelected
 
-    let deleteButton = document.createElement('button')
-    deleteButton.classList.add('delete')
-    deleteButton.textContent = 'DELETE'
+    let deleteButton = this.deleteButton()
 
     clothingLi.appendChild(toggleInput)
     clothingLi.appendChild(clothingName)
     clothingLi.appendChild(deleteButton)
     clothingFragment.appendChild(clothingLi)
 
-    return clothingFragment
+    return clothingLi
+  },
+
+  deleteButton: function(){
+    let deleteButton = document.createElement('button')
+    deleteButton.classList.add('delete')
+    deleteButton.textContent = 'DELETE'
+    return deleteButton
+  },
+
+  checkboxInput: function(isChecked){
+    let checkbox = document.createElement('input')
+    checkbox.type = 'checkbox'
+    checkbox.checked = isChecked
+    return checkbox
   },
 
   renderOutfit: function(outfit){
@@ -192,32 +212,40 @@ var App = {
     let outfitLi = document.createElement('li')
     outfitLi.dataset.id = outfit.id
 
-    let toggleOutfitContent = document.createElement('input')
+    let toggleOutfitContent = this.checkboxInput(isContentVisible)
     toggleOutfitContent.classList.add('toggle-outfit-content')
-    toggleOutfitContent.type = 'checkbox'
-    toggleOutfitContent.checked = isContentVisible
 
     let outfitName = document.createElement('label')
     outfitName.textContent = outfit.name
 
     let outfitContent = document.createElement('ul')
     outfitContent.classList.add('outfit-content')
-    let outfitContentFragment = document.createDocumentFragment()
+    // let outfitContentFragment = document.createDocumentFragment()
+
+    let datesWorn = outfit.datesWorn
+    let numberOfTimesWorn = datesWorn.length
+    if (numberOfTimesWorn > 0) {
+      let mostRecentDate = document.createElement('span')
+      mostRecentDate.textContent = 'Last worn: ' + moment(datesWorn[numberOfTimesWorn-1]).format('MMMM DD YYYY')
+      // outfitContentFragment.appendChild(mostRecentDate)
+      outfitContent.appendChild(mostRecentDate)
+    }
+
     outfit.clothes.forEach( (clothing) => {
       let clothingLi = document.createElement('li')
       clothingLi.textContent = clothing.name
-      outfitContentFragment.appendChild(clothingLi)
+      // outfitContentFragment.appendChild(clothingLi)
+      outfitContent.appendChild(clothingLi)
     })
-    outfitContent.appendChild(outfitContentFragment)
+    // outfitContent.appendChild(outfitContentFragment)
+
     outfitContent.style.display = isContentVisible ? 'block' : 'none'
 
     let wearButton = document.createElement('button')
     wearButton.classList.add('wear-outfit')
     wearButton.textContent = 'Wear Outfit'
 
-    let deleteButton = document.createElement('button')
-    deleteButton.classList.add('delete')
-    deleteButton.textContent = 'DELETE'
+    let deleteButton = this.deleteButton()
 
     outfitLi.appendChild(toggleOutfitContent)
     outfitLi.appendChild(outfitName)
@@ -227,6 +255,26 @@ var App = {
     outfitFragment.appendChild(outfitLi)
 
     return outfitFragment
+  },
+
+  outfitsIncludingSelected() {
+    let selectedClothes = this.clothes.filter( clothing => {
+      return clothing.isSelected
+    })
+
+    let outfits = this.outfits.filter( outfit => this.outfitIncludes(outfit, selectedClothes) )
+    return outfits
+  },
+
+  outfitIncludes(outfit, clothes) {
+    let outfitClothesIDs = outfit.clothes.map( clothing => clothing.id )
+    let includesClothes = true
+    let i = 0
+    while (includesClothes && (i < clothes.length) ){
+      includesClothes = outfitClothesIDs.includes(clothes[i].id)
+      i++
+    }
+    return includesClothes
   },
 
   toggleOutfitContent: function(e){
