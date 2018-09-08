@@ -164,9 +164,6 @@ let App = {
   },
 
   renderClothing: function(clothing){
-    let clothingFragment = document.createDocumentFragment()
-    
-
     let clothingLi = document.createElement('li')
     clothingLi.dataset.id = clothing.id
 
@@ -183,10 +180,7 @@ let App = {
 
     let deleteButton = this.deleteButton()
 
-    clothingLi.appendChild(toggleInput)
-    clothingLi.appendChild(clothingName)
-    clothingLi.appendChild(deleteButton)
-    clothingFragment.appendChild(clothingLi)
+    clothingLi.appendChild(this.fragmentFromElements([toggleInput, clothingName, deleteButton]))
 
     return clothingLi
   },
@@ -207,7 +201,6 @@ let App = {
 
   renderOutfit: function(outfit){
     let isContentVisible = outfit.isContentVisible
-    let outfitFragment = document.createDocumentFragment()
 
     let outfitLi = document.createElement('li')
     outfitLi.dataset.id = outfit.id
@@ -220,24 +213,16 @@ let App = {
 
     let outfitContent = document.createElement('ul')
     outfitContent.classList.add('outfit-content')
-    // let outfitContentFragment = document.createDocumentFragment()
 
-    let datesWorn = outfit.datesWorn
-    let numberOfTimesWorn = datesWorn.length
-    if (numberOfTimesWorn > 0) {
-      let mostRecentDate = document.createElement('span')
-      mostRecentDate.textContent = 'Last worn: ' + moment(datesWorn[numberOfTimesWorn-1]).format('MMMM DD YYYY')
-      // outfitContentFragment.appendChild(mostRecentDate)
-      outfitContent.appendChild(mostRecentDate)
+    if (outfit.datesWorn.length) {
+      outfitContent.appendChild(this.mostRecentDate(outfit))
     }
 
     outfit.clothes.forEach( (clothing) => {
       let clothingLi = document.createElement('li')
       clothingLi.textContent = clothing.name
-      // outfitContentFragment.appendChild(clothingLi)
       outfitContent.appendChild(clothingLi)
     })
-    // outfitContent.appendChild(outfitContentFragment)
 
     outfitContent.style.display = isContentVisible ? 'block' : 'none'
 
@@ -247,17 +232,31 @@ let App = {
 
     let deleteButton = this.deleteButton()
 
-    outfitLi.appendChild(toggleOutfitContent)
-    outfitLi.appendChild(outfitName)
-    outfitLi.appendChild(deleteButton)
-    outfitLi.appendChild(wearButton)
-    outfitLi.appendChild(outfitContent)
-    outfitFragment.appendChild(outfitLi)
+    outfitLi.appendChild(this.fragmentFromElements([toggleOutfitContent, outfitName, 
+      deleteButton, wearButton, outfitContent]))
 
-    return outfitFragment
+    return outfitLi
   },
 
-  outfitsIncludingSelected() {
+  mostRecentDate(outfit) {
+    let datesWorn = outfit.datesWorn
+    let numberOfTimesWorn = datesWorn.length
+    let mostRecentDate = document.createElement('span')
+    mostRecentDate.textContent = 'Last worn: ' + moment(datesWorn[numberOfTimesWorn-1]).format('MMMM DD YYYY')
+    return mostRecentDate
+  },
+
+  fragmentFromElements: function(elements) {
+    let toAppend = document.createDocumentFragment()
+    let i = 0
+    while (i < elements.length) {
+      toAppend.appendChild(elements[i])
+      i++
+    }
+    return toAppend
+  },
+
+  outfitsIncludingSelected: function() {
     let selectedClothes = this.clothes.filter( clothing => {
       return clothing.isSelected
     })
@@ -266,7 +265,7 @@ let App = {
     return outfits
   },
 
-  outfitIncludes(outfit, clothes) {
+  outfitIncludes: function(outfit, clothes) {
     let outfitClothesIDs = outfit.clothes.map( clothing => clothing.id )
     let includesClothes = true
     let i = 0
