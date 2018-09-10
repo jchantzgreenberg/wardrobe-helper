@@ -1,21 +1,4 @@
-let util = {
-  uuid: function() {
-    //replace with actual uuid4 implementation
-    let random = '' + Math.random()
-    return random
-  },
-
-  store: function (name, data) {
-    return localStorage.setItem(name, JSON.stringify(data))
-  },
-
-  retrieve: function (name) {
-    let storedData = localStorage.getItem(name)
-    return JSON.parse(storedData) || []
-  }
-}
-
-;(() => {
+(() => {
   let App = {
     init: function() {
       moment.fn.toJSON = function() { return this.format() } 
@@ -310,4 +293,6 @@ let util = {
   }
 
   App.init()
+  window.App = App
 })()
+
