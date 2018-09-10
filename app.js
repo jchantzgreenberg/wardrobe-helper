@@ -1,4 +1,4 @@
-let util = {
+(() => {let util = {
   uuid: function() {
     //replace with actual uuid4 implementation
     let random = '' + Math.random()
@@ -309,3 +309,4 @@ let App = {
 }
 
 App.init()
+})()
