@@ -2,8 +2,7 @@
   let App = {
     init: function() {
       moment.fn.toJSON = function() { return this.format() } 
-      this.clothes.clothes = util.retrieve('clothes')
-      this.outfits.outfits = util.retrieve('outfits')
+      this.retrieve()
       this.bindEvents()
       this.render()
     },
@@ -109,10 +108,11 @@
           datesWorn: [],
         })
       },
+
       wearOutfit: function(i) {
-        let now = moment()
-        this.outfits[i].lastWorn = now.format('MMMM DD YYYY')
-        this.outfits[i].datesWorn.push(now)
+        let lastWorn = moment()
+        this.outfits[i].lastWorn = lastWorn
+        this.outfits[i].datesWorn.push(lastWorn)
       },
 
       outfitsIncludingSelected: function(clothes) {
@@ -129,6 +129,14 @@
           i++
         }
         return includesClothes
+      },
+
+      datesToMoment() {
+        this.outfits.forEach( outfit => {
+          outfit.datesWorn = outfit.datesWorn.map(date => moment(date))
+          outfit.lastWorn = moment(outfit.lastWorn)
+        })
+
       },
     },
 
@@ -178,10 +186,20 @@
 
     render: function(){
       this.renderClothes(this.clothes.clothes)
-      this.renderOutfits(this.outfits.outfits)
+      this.renderOutfits(this.outfits.outfits) 
 
+      this.store()     
+    },
+
+    store: function(){
       util.store('clothes', this.clothes.clothes)
       util.store('outfits', this.outfits.outfits)
+    },
+
+    retrieve: function(){
+      this.clothes.clothes = util.retrieve('clothes')
+      this.outfits.outfits = util.retrieve('outfits')
+      this.outfits.datesToMoment()
     },
 
     renderClothes: function(clothes){
@@ -289,7 +307,7 @@
     
     mostRecentDate(outfit) {
       let mostRecentDate = document.createElement('span')
-      mostRecentDate.textContent = 'Last worn: ' + outfit.lastWorn
+      mostRecentDate.textContent = 'Last worn: ' + outfit.lastWorn.format('MMMM DD YYYY')
       return mostRecentDate
     },
 
