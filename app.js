@@ -115,9 +115,9 @@
         this.outfits[i].datesWorn.push(lastWorn)
       },
 
-      outfitsIncludingSelected: function(clothes) {
-        let outfits = this.outfits.filter( outfit => this.outfitIncludes(outfit, clothes) )
-        return outfits
+      outfitsIncludingSelected: function(outfits, clothes) {
+        let outfitsIncludingSelected = this.outfits.filter( outfit => this.outfitIncludes(outfit, clothes) )
+        return outfitsIncludingSelected
       },
 
       outfitIncludes: function(outfit, clothes) {
@@ -131,13 +131,22 @@
         return includesClothes
       },
 
-      datesToMoment() {
+      datesToMoment: function() {
         this.outfits.forEach( outfit => {
           outfit.datesWorn = outfit.datesWorn.map(date => moment(date))
           outfit.lastWorn = moment(outfit.lastWorn)
         })
-
       },
+
+      outfitsWornSince: function(outfits, days) {
+        let now = moment()
+        let outfitsWornSince = this.outfits.filter( outfit => {
+          let daysSinceLastWorn = now.endOf('day').diff(outfit.lastWorn, 'days')
+          return daysSinceLastWorn <= days
+        })
+        return outfitsWornSince
+      }
+
     },
 
     createOutfit: function (e) {
