@@ -1,7 +1,8 @@
 (() => {
   let App = {
     init: function() {
-      moment.fn.toJSON = function() { return this.format() } 
+      moment.fn.toJSON = function() { return this.format() }
+
       this.retrieve()
       this.bindEvents()
       this.render()
@@ -91,64 +92,6 @@
       this.render()
     },
 
-    outfits: {
-      outfits: [],
-      addOutfit: function(name, clothes) {
-        clothes = clothes.map( (clothing) => {   
-          return {
-            id: clothing.id,
-            name: clothing.name
-          }
-        }) 
-        this.outfits.push({
-          id: util.uuid(),
-          name: name,
-          clothes: clothes,
-          isContentVisible: false,
-          datesWorn: [],
-        })
-      },
-
-      wearOutfit: function(i) {
-        let lastWorn = moment()
-        this.outfits[i].lastWorn = lastWorn
-        this.outfits[i].datesWorn.push(lastWorn)
-      },
-
-      outfitsIncludingSelected: function(outfits, clothes) {
-        let outfitsIncludingSelected = this.outfits.filter( outfit => this.outfitIncludes(outfit, clothes) )
-        return outfitsIncludingSelected
-      },
-
-      outfitIncludes: function(outfit, clothes) {
-        let outfitClothesIDs = outfit.clothes.map( clothing => clothing.id )
-        let includesClothes = true
-        let i = 0
-        while (includesClothes && (i < clothes.length) ){
-          includesClothes = outfitClothesIDs.includes(clothes[i].id)
-          i++
-        }
-        return includesClothes
-      },
-
-      datesToMoment: function() {
-        this.outfits.forEach( outfit => {
-          outfit.datesWorn = outfit.datesWorn.map(date => moment(date))
-          outfit.lastWorn = moment(outfit.lastWorn)
-        })
-      },
-
-      outfitsWornSince: function(outfits, days) {
-        let now = moment()
-        let outfitsWornSince = this.outfits.filter( outfit => {
-          let daysSinceLastWorn = now.endOf('day').diff(outfit.lastWorn, 'days')
-          return daysSinceLastWorn <= days
-        })
-        return outfitsWornSince
-      }
-
-    },
-
     createOutfit: function (e) {
       let input = e.target
       let outfitName = input.value.trim()
@@ -163,7 +106,7 @@
         return
       }
 
-      this.outfits.addOutfit(outfitName, selectedClothes)
+      outfits.addOutfit(outfitName, selectedClothes)
       this.render()
     },
 
@@ -172,8 +115,8 @@
         return
       }
 
-      let i = this.getIndexFromEl(e.target, this.outfits.outfits)
-      this.outfits.wearOutfit(i)
+      let i = this.getIndexFromEl(e.target, outfits.outfits)
+      outfits.wearOutfit(i)
 
       this.render()
     },
@@ -184,31 +127,31 @@
       if (!toggle.matches('.toggle-outfit-content')){
         return
       }
-      let i = this.getIndexFromEl(e.target, this.outfits.outfits)
+      let i = this.getIndexFromEl(e.target, outfits.outfits)
 
-      this.outfits.outfits[i].isContentVisible= !this.outfits.outfits[i].isContentVisible
+      outfits.outfits[i].isContentVisible= !outfits.outfits[i].isContentVisible
 
       let outfitContent = toggle.parentNode.getElementsByClassName('outfit-content')[0]
-      outfitContent.style.display = this.outfits.outfits[i].isContentVisible ? 'block' : 'none'
+      outfitContent.style.display = outfits.outfits[i].isContentVisible ? 'block' : 'none'
       this.render()
     },
 
     render: function(){
       this.renderClothes(this.clothes.clothes)
-      this.renderOutfits(this.outfits.outfits) 
+      this.renderOutfits(outfits.outfits) 
 
       this.store()     
     },
 
     store: function(){
       util.store('clothes', this.clothes.clothes)
-      util.store('outfits', this.outfits.outfits)
+      util.store('outfits', outfits.outfits)
     },
 
     retrieve: function(){
       this.clothes.clothes = util.retrieve('clothes')
-      this.outfits.outfits = util.retrieve('outfits')
-      this.outfits.datesToMoment()
+      outfits.outfits = util.retrieve('outfits')
+      outfits.datesToMoment()
     },
 
     renderClothes: function(clothes){
