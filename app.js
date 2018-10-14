@@ -20,6 +20,10 @@
       outfitList.addEventListener('click', this.delete.bind(this))
       outfitList.addEventListener('click', this.wearOutfit.bind(this))
     },
+
+    clothes: clothes,
+
+    outfits: outfits,
     
     //replace with methods in the clothes and outfits objects that search by id
     getIndexFromEl: function(el, array) {
@@ -44,26 +48,6 @@
       this.render()
     },
 
-    clothes: {
-      clothes: [],
-      addClothing: function (name) {
-        clothes.push({
-          id: util.uuid(),
-          name: name,
-          isSelected: false
-        })
-      },
-
-      selectedClothes: function() {
-        let selectedClothes = clothes.filter( clothing => clothing.isSelected )
-        return selectedClothes
-      },
-
-      toggleSelected: function(i) {
-        clothes[i].isSelected = !clothes[i].isSelected      
-      }
-
-    },
 
     createClothing: function (e) {
       let input = e.target
