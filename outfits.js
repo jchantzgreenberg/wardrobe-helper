@@ -39,10 +39,14 @@
       return includesClothes
     },
 
+
     datesToMoment: function() {
+      debugger
       this.outfits.forEach( outfit => {
-        outfit.datesWorn = outfit.datesWorn.map(date => moment(date))
-        outfit.lastWorn = moment(outfit.lastWorn)
+        if (outfit.datesWorn.length){
+          outfit.datesWorn = outfit.datesWorn.map(date => moment(date))
+          outfit.lastWorn = moment(outfit.lastWorn)
+        }
       })
     },
 

@@ -3,6 +3,8 @@
     init: function() {
       moment.fn.toJSON = function() { return this.format() }
       this.retrieve()
+      this.clothes = clothes
+      this.outfits = outfits
       this.bindEvents()
       this.render()
     },
@@ -21,9 +23,6 @@
       outfitList.addEventListener('click', this.wearOutfit.bind(this))
     },
 
-    clothes: clothes,
-
-    outfits: outfits,
     
     //replace with methods in the clothes and outfits objects that search by id
     getIndexFromEl: function(el, array) {
@@ -203,7 +202,7 @@
       let outfitContent = document.createElement('ul')
       outfitContent.classList.add('outfit-content')
 
-      if (outfit.lastWorn) {
+      if (outfit.datesWorn.length) {
         outfitContent.appendChild(this.mostRecentDate(outfit))
       }
 
