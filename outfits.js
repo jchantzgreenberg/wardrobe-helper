@@ -39,9 +39,12 @@
       return includesClothes
     },
 
+    retrieve: function() {
+      this.outfits = util.retrieve('outfits')
+      this.datesToMoment()
+    },
 
     datesToMoment: function() {
-      debugger
       this.outfits.forEach( outfit => {
         if (outfit.datesWorn.length){
           outfit.datesWorn = outfit.datesWorn.map(date => moment(date))

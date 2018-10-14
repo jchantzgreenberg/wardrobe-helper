@@ -5,8 +5,12 @@
       this.clothes.push({
         id: util.uuid(),
         name: name,
-        isSelected: false
+        isSelected: false,
       })
+    },
+
+    retrieve: function() {
+      this.clothes = util.retrieve('clothes')
     },
 
     selectedClothes: function() {

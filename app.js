@@ -132,9 +132,8 @@
     },
 
     retrieve: function(){
-      clothes.clothes = util.retrieve('clothes')
-      outfits.outfits = util.retrieve('outfits')
-      outfits.datesToMoment()
+      clothes.retrieve()
+      outfits.retrieve()
     },
 
     renderClothes: function(clothes){
