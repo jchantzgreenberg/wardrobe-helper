@@ -2,7 +2,6 @@
   let App = {
     init: function() {
       moment.fn.toJSON = function() { return this.format() }
-
       this.retrieve()
       this.bindEvents()
       this.render()
@@ -22,6 +21,7 @@
       outfitList.addEventListener('click', this.wearOutfit.bind(this))
     },
     
+    //replace with methods in the clothes and outfits objects that search by id
     getIndexFromEl: function(el, array) {
       let id = el.closest('li').dataset.id
       let i = array.length
@@ -47,7 +47,7 @@
     clothes: {
       clothes: [],
       addClothing: function (name) {
-        this.clothes.push({
+        clothes.push({
           id: util.uuid(),
           name: name,
           isSelected: false
@@ -55,12 +55,12 @@
       },
 
       selectedClothes: function() {
-        let selectedClothes = this.clothes.filter( clothing => clothing.isSelected )
+        let selectedClothes = clothes.filter( clothing => clothing.isSelected )
         return selectedClothes
       },
 
       toggleSelected: function(i) {
-        this.clothes[i].isSelected = !this.clothes[i].isSelected      
+        clothes[i].isSelected = !clothes[i].isSelected      
       }
 
     },
@@ -78,7 +78,7 @@
         return
       }
 
-      this.clothes.addClothing(value)
+      clothes.addClothing(value)
 
       this.render()
     },
@@ -87,15 +87,15 @@
       if (!e.target.matches('.toggle')){ 
         return
       }
-      let i = this.getIndexFromEl(e.target, this.clothes.clothes)
-      this.clothes.toggleSelected(i)
+      let i = this.getIndexFromEl(e.target, clothes.clothes)
+      clothes.toggleSelected(i)
       this.render()
     },
 
     createOutfit: function (e) {
       let input = e.target
       let outfitName = input.value.trim()
-      let selectedClothes = this.clothes.selectedClothes()
+      let selectedClothes = clothes.selectedClothes()
       let key = e.key
 
       if ( key ==='Enter' ){
@@ -137,19 +137,19 @@
     },
 
     render: function(){
-      this.renderClothes(this.clothes.clothes)
+      this.renderClothes(clothes.clothes)
       this.renderOutfits(outfits.outfits) 
 
       this.store()     
     },
 
     store: function(){
-      util.store('clothes', this.clothes.clothes)
+      util.store('clothes', clothes.clothes)
       util.store('outfits', outfits.outfits)
     },
 
     retrieve: function(){
-      this.clothes.clothes = util.retrieve('clothes')
+      clothes.clothes = util.retrieve('clothes')
       outfits.outfits = util.retrieve('outfits')
       outfits.datesToMoment()
     },
