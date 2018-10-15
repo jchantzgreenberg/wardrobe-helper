@@ -14,10 +14,21 @@
     return JSON.parse(storedData) || []
   }
 
+  let getIndex = function(uuid) {
+    let i = this.array.length
+
+    while (i--) {
+      if (this.array[i].id === uuid) {
+        return i
+      }
+    }
+  }
+
   let util = {
     uuid: uuid,
+    getIndex: getIndex,
     store: store,
-    retrieve: retrieve
+    retrieve: retrieve,
   }
 
   window.util = util

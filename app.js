@@ -2,9 +2,10 @@
   let App = {
     init: function() {
       moment.fn.toJSON = function() { return this.format() }
-      this.retrieve()
-      this.clothes = clothes
+      this.clothes = new Clothes()
       this.outfits = outfits
+      this.outfits.getIndex = util.getIndex
+      this.retrieve()
       this.bindEvents()
       this.render()
     },
@@ -23,17 +24,11 @@
       outfitList.addEventListener('click', this.wearOutfit.bind(this))
     },
 
-    
-    //replace with methods in the clothes and outfits objects that search by id
-    getIndexFromEl: function(el, array) {
-      let id = el.closest('li').dataset.id
-      let i = array.length
-
-      while (i--) {
-        if (array[i].id === id) {
-          return i
-        }
-      }
+    getIndexFromEl: function(el) {
+      let uuid = el.closest('li').dataset.id
+      let closestUL = el.closest('ul').id
+      let index = this[closestUL].getIndex(uuid)
+      return index
     },
 
     delete: function(e){
@@ -61,7 +56,7 @@
         return
       }
 
-      clothes.addClothing(value)
+      this.clothes.addClothing(value)
 
       this.render()
     },
@@ -70,15 +65,15 @@
       if (!e.target.matches('.toggle')){ 
         return
       }
-      let i = this.getIndexFromEl(e.target, clothes.clothes)
-      clothes.toggleSelected(i)
+      let i = this.getIndexFromEl(e.target)
+      this.clothes.toggleSelected(i)
       this.render()
     },
 
     createOutfit: function (e) {
       let input = e.target
       let outfitName = input.value.trim()
-      let selectedClothes = clothes.selectedClothes()
+      let selectedClothes =this.clothes.selectedClothes()
       let key = e.key
 
       if ( key ==='Enter' ){
@@ -98,7 +93,7 @@
         return
       }
 
-      let i = this.getIndexFromEl(e.target, outfits.outfits)
+      let i = this.getIndexFromEl(e.target)
       outfits.wearOutfit(i)
 
       this.render()
@@ -110,42 +105,45 @@
       if (!toggle.matches('.toggle-outfit-content')){
         return
       }
-      let i = this.getIndexFromEl(e.target, outfits.outfits)
+      let i = this.getIndexFromEl(e.target)
 
-      outfits.outfits[i].isContentVisible= !outfits.outfits[i].isContentVisible
+      outfits.toggleContentVisibility(i)
 
-      let outfitContent = toggle.parentNode.getElementsByClassName('outfit-content')[0]
-      outfitContent.style.display = outfits.outfits[i].isContentVisible ? 'block' : 'none'
+      //outfits.outfits[i].isContentVisible= !outfits.outfits[i].isContentVisible
+
+      // let outfitContent = toggle.parentNode.getElementsByClassName('outfit-content')[0]
+      // outfitContent.style.display = outfits.outfits[i].isContentVisible ? 'block' : 'none'
       this.render()
     },
 
     render: function(){
-      this.renderClothes(clothes.clothes)
-      this.renderOutfits(outfits.outfits) 
+      this.renderClothes(clothes.array)
+      this.renderOutfits(outfits.array) 
 
       this.store()     
     },
 
     store: function(){
-      util.store('clothes', clothes.clothes)
-      util.store('outfits', outfits.outfits)
+      util.store('clothes',this.clothes.array)
+      util.store('outfits', outfits.array)
     },
 
     retrieve: function(){
-      clothes.retrieve()
-      outfits.retrieve()
+      debugger
+      this.clothes.retrieve()
+      this.outfits.retrieve()
     },
 
     renderClothes: function(clothes){
       let clothingUL = document.getElementById('clothes')
       clothingUL.textContent = '' 
 
-      if (clothes.length === 0) {
+      if (this.clothes.length === 0) {
         return
       }
 
       let clothingList = document.createDocumentFragment() 
-      clothes.forEach( (el) => clothingList.appendChild( this.renderClothing(el) ) )
+      this.clothes.array.forEach( (el) => clothingList.appendChild( this.renderClothing(el) ) )
 
       clothingUL.appendChild(clothingList)
     },
@@ -200,6 +198,7 @@
 
       let outfitContent = document.createElement('ul')
       outfitContent.classList.add('outfit-content')
+      outfitContent.style.display = isContentVisible ? 'block' : 'none'
 
       if (outfit.datesWorn.length) {
         outfitContent.appendChild(this.mostRecentDate(outfit))
@@ -210,8 +209,6 @@
         clothingLi.textContent = clothing.name
         outfitContent.appendChild(clothingLi)
       })
-
-      outfitContent.style.display = isContentVisible ? 'block' : 'none'
 
       let wearButton = document.createElement('button')
       wearButton.classList.add('wear-outfit')
@@ -238,7 +235,7 @@
       checkbox.checked = isChecked
       return checkbox
     },
-    
+
     mostRecentDate(outfit) {
       let mostRecentDate = document.createElement('span')
       mostRecentDate.textContent = 'Last worn: ' + outfit.lastWorn.format('MMMM DD YYYY')
