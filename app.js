@@ -44,7 +44,7 @@
       if (!e.target.matches('.delete')){ 
         return
       }
-      let closestList = this[e.target.closest('ul').id][e.target.closest('ul').id]
+      let closestList = this[e.target.closest('ul').id].array
       let i = this.getIndexFromEl(e.target, closestList)
       closestList.splice(i, 1)
 
