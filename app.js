@@ -5,6 +5,10 @@
       this.clothes = new Clothes()
       this.outfits = outfits
       this.outfits.getIndex = util.getIndex
+      this.filters = {
+        wornSince: false,
+        includingSelected: false,
+      }
       this.retrieve()
       this.bindEvents()
       this.render()
@@ -15,6 +19,8 @@
       let newOutfit = document.getElementById('new-outfit')
       let clothingList = document.getElementById('clothes')
       let outfitList = document.getElementById('outfits')
+      let toggleWornSince = document.getElementById('wornSince')
+      let toggleIncludingSelected = document.getElementById('includingSelected')
       newClothing.addEventListener('keyup', this.createClothing.bind(this))
       newOutfit.addEventListener('keyup', this.createOutfit.bind(this))
       clothingList.addEventListener('click', this.toggleClothing.bind(this))
@@ -22,6 +28,9 @@
       outfitList.addEventListener('click', this.toggleOutfitContent.bind(this))
       outfitList.addEventListener('click', this.delete.bind(this))
       outfitList.addEventListener('click', this.wearOutfit.bind(this))
+      toggleWornSince.addEventListener('click', this.toggleFilter.bind(this))
+      toggleIncludingSelected.addEventListener('click', this.toggleFilter.bind(this))
+
     },
 
     getIndexFromEl: function(el) {
@@ -42,6 +51,15 @@
       this.render()
     },
 
+    toggleFilter: function(e){
+      let target = e.target
+      let type = target.id
+      if (!target.matches('.filter')){
+        return
+      }
+      this.filters[type] = !this.filters[type]
+      this.render()
+    },
 
     createClothing: function (e) {
       let input = e.target
@@ -106,20 +124,13 @@
         return
       }
       let i = this.getIndexFromEl(e.target)
-
       outfits.toggleContentVisibility(i)
-
-      //outfits.outfits[i].isContentVisible= !outfits.outfits[i].isContentVisible
-
-      // let outfitContent = toggle.parentNode.getElementsByClassName('outfit-content')[0]
-      // outfitContent.style.display = outfits.outfits[i].isContentVisible ? 'block' : 'none'
       this.render()
     },
 
     render: function(){
-      this.renderClothes(clothes.array)
-      this.renderOutfits(outfits.array) 
-
+      this.renderClothes(this.clothes.array)
+      this.renderOutfits(outfits.filteredOutfits(this.filters, this.clothes.selectedClothes())) 
       this.store()     
     },
 
@@ -129,7 +140,6 @@
     },
 
     retrieve: function(){
-      debugger
       this.clothes.retrieve()
       this.outfits.retrieve()
     },

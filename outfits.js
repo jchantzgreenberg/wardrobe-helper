@@ -66,16 +66,24 @@
       return outfitsWornSince
     },
 
-    outfitsWornSinceAndIncluding: function(outfits, days, clothes) {
-      let outfitsWornSince = this.arrayWornSince(outfits, days)
-      let outfitsWornSinceAndIncluding = this.arrayIncludingSelected(outfitsWornSince, clothes)
-      return outfitsWornSinceAndIncluding
-    },
-
     toggleContentVisibility: function(index) {
       let isContentVisible = this.array[index].isContentVisible
       this.array[index].isContentVisible = !isContentVisible
-    }
+    },
+
+    filteredOutfits: function(filters, selectedClothes) {
+      let filteredOutfits = []
+      for (let i = 0; i<this.array.length; i++){
+        filteredOutfits.push(this.array[i])
+      }
+      if (filters.wornSince){
+        filteredOutfits = this.outfitsWornSince(filteredOutfits, 7)
+      }
+      if (filters.includingSelected){
+        filteredOutfits = this.outfitsIncludingSelected(filteredOutfits, selectedClothes)
+      }
+      return filteredOutfits
+    },
   }
   window.outfits = outfits
 })()
